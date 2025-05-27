@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}API Documentation - RAISE Insurance{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">RAISE Insurance API Documentation</h1>
+    
+    <div class="space-y-8">
+        <!-- Authentication Endpoints -->
+        <section>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Authentication Endpoints</h2>
+            <div class="space-y-4">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">POST</span> <span class="text-blue-600">/api/auth/login</span></p>
+                    <p class="text-gray-600">Login to get access and refresh tokens</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">POST</span> <span class="text-blue-600">/api/auth/refresh</span></p>
+                    <p class="text-gray-600">Refresh access token using refresh token</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">POST</span> <span class="text-blue-600">/api/auth/logout</span></p>
+                    <p class="text-gray-600">Logout and invalidate tokens</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">GET</span> <span class="text-blue-600">/api/auth/me</span></p>
+                    <p class="text-gray-600">Get current user information</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Accident Endpoints -->
+        <section>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Accident Endpoints</h2>
+            <div class="space-y-4">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">GET</span> <span class="text-blue-600">/api/accidents/</span></p>
+                    <p class="text-gray-600">Get all accidents (admin, insurance_agent, police)</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">GET</span> <span class="text-blue-600">/api/accidents/{id}</span></p>
+                    <p class="text-gray-600">Get specific accident details</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">POST</span> <span class="text-blue-600">/api/accidents/</span></p>
+                    <p class="text-gray-600">Create new accident report (police only)</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">PUT</span> <span class="text-blue-600">/api/accidents/{id}</span></p>
+                    <p class="text-gray-600">Update accident report (admin, police)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Insurance Claim Endpoints -->
+        <section>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Insurance Claim Endpoints</h2>
+            <div class="space-y-4">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">GET</span> <span class="text-blue-600">/api/insurance/claims</span></p>
+                    <p class="text-gray-600">Get all insurance claims (admin, insurance_agent)</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">GET</span> <span class="text-blue-600">/api/insurance/claims/{id}</span></p>
+                    <p class="text-gray-600">Get specific claim details</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">POST</span> <span class="text-blue-600">/api/insurance/claims</span></p>
+                    <p class="text-gray-600">Create new insurance claim (insurance_agent)</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">PUT</span> <span class="text-blue-600">/api/insurance/claims/{id}</span></p>
+                    <p class="text-gray-600">Update claim details (admin, insurance_agent)</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <p class="mb-2"><span class="font-bold text-red-600">PATCH</span> <span class="text-blue-600">/api/insurance/claims/{id}/status</span></p>
+                    <p class="text-gray-600">Update claim status (admin, insurance_agent)</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %} 

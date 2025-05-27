@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../features/home/presentation/screens/home_screen.dart';
+import '../navigation/main_navigation.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -14,8 +15,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomeScreen(),
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/app',
+        builder: (context, state) => const MainNavigation(),
       ),
     ],
   );
@@ -41,8 +46,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    // Skip login for now, go directly to home
-    context.go('/home');
+    // TODO: Check if user is logged in
+    // For now, go directly to main app
+    context.go('/app');
   }
 
   @override
