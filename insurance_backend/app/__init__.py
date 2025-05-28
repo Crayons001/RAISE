@@ -21,10 +21,10 @@ migrate = Migrate()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
+# Temporarily disable user loader for UI preview
 @login_manager.user_loader
 def load_user(user_id):
-    from app.models import User
-    return User.query.get(int(user_id))
+    return None  # Temporarily return None for UI preview
 
 def create_app(config_class=None):
     app = Flask(__name__)
@@ -59,7 +59,7 @@ def create_app(config_class=None):
     CORS(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    csrf.init_app(app)  # Initialize CSRF protection
+    csrf.init_app(app)
     login_manager.login_view = 'main.login'
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
@@ -69,22 +69,11 @@ def create_app(config_class=None):
     def inject_datetime():
         return {'datetime': datetime}
 
-    # Register blueprints
-    from app.routes import auth, accidents, insurance, main
-    app.register_blueprint(main.bp)  # Register main blueprint first
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(accidents.bp)
-    app.register_blueprint(insurance.bp)
+    # Register only the main blueprint for UI preview
+    from app.routes.main import bp as main_bp
+    app.register_blueprint(main_bp)
 
-    # Register CLI commands
-    from app.cli import init_app as init_cli
-    init_cli(app)
-
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-        
-        # Create upload directory if it doesn't exist
-        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    # Create upload directory if it doesn't exist
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     return app 

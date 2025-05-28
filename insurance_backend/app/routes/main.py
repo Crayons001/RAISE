@@ -1,13 +1,9 @@
 from flask import Blueprint, jsonify, render_template, redirect, url_for, flash, request, session
 from flask_login import login_required, current_user, logout_user, login_user
-from app.models import User, Accident, InsuranceClaim, db
-from app.utils.auth_middleware import role_required
-from datetime import datetime
-from werkzeug.security import check_password_hash
+from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import DataRequired, Email
-from app.models import UserRole
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -18,10 +14,8 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    """Redirect to appropriate page based on authentication status"""
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-    return redirect(url_for('main.login'))
+    """Redirect to dashboard for UI preview"""
+    return redirect(url_for('main.dashboard'))
 
 @bp.route('/docs')
 def api_docs():
@@ -46,70 +40,78 @@ def api_info():
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     """Handle login page and form submission"""
-    if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-    
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        
-        if user and check_password_hash(user.password_hash, form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({
-                    'access_token': user.generate_access_token(),
-                    'refresh_token': user.generate_refresh_token(),
-                    'message': 'Login successful'
-                })
-            flash('Login successful!', 'success')
-            next_page = request.args.get('next')
-            if not next_page or not next_page.startswith('/'):
-                next_page = url_for('main.dashboard')
-            return redirect(next_page)
-        else:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({
-                    'message': 'Invalid email or password'
-                }), 401
-            flash('Invalid email or password', 'error')
-    
-    # Clear any existing flash messages when showing the login form
-    if request.method == 'GET':
-        session.pop('_flashes', None)
+        # Temporarily bypass authentication for UI preview
+        flash('Login successful! (Preview Mode)', 'success')
+        return redirect(url_for('main.dashboard'))
     
     return render_template('auth/login.html', form=form)
 
 @bp.route('/dashboard')
-@login_required
 def dashboard():
-    """Serve the dashboard page with role-specific content"""
+    """Serve the dashboard page with dummy data for UI preview"""
     try:
-        context = {}
-        
-        # Debug logging
-        print(f"Current user: {current_user.email}, Role: {current_user.role}")
-        
-        # Convert role to string for comparison
-        role_str = str(current_user.role)
-        
-        if role_str == 'admin':
-            # Get counts for admin dashboard
-            context.update({
-                'total_users': User.query.count(),
-                'total_accidents': Accident.query.count(),
-                'total_claims': InsuranceClaim.query.count()
-            })
-        elif role_str == 'police':
-            # Get recent accidents for police dashboard
-            context['recent_accidents'] = Accident.query.order_by(Accident.date_time.desc()).limit(5).all()
-        elif role_str in ['insurance_agent', 'insurance_officer']:
-            # Get recent claims for insurance officer dashboard
-            context['recent_claims'] = InsuranceClaim.query.order_by(InsuranceClaim.created_at.desc()).limit(5).all()
-        else:
-            # Handle unknown role
-            flash('Invalid user role', 'error')
-            return redirect(url_for('main.logout'))
-        
+        # Dummy data for statistics
+        context = {
+            'total_reports': 42,
+            'pending_reports': 15,
+            'investigating_reports': 12,
+            'completed_reports': 15,
+            'recent_reports': [
+                {
+                    'id': 1,
+                    'report_number': 'ACC-2024-001',
+                    'date': '2024-05-28',
+                    'time': '14:30',
+                    'location': 'Main Street, Downtown',
+                    'vehicles': 2,
+                    'status': 'pending'
+                },
+                {
+                    'id': 2,
+                    'report_number': 'ACC-2024-002',
+                    'date': '2024-05-28',
+                    'time': '13:15',
+                    'location': 'Highway 101, Exit 45',
+                    'vehicles': 3,
+                    'status': 'verified'
+                },
+                {
+                    'id': 3,
+                    'report_number': 'ACC-2024-003',
+                    'date': '2024-05-27',
+                    'time': '16:45',
+                    'location': 'Park Avenue, Near Mall',
+                    'vehicles': 2,
+                    'status': 'resolved'
+                },
+                {
+                    'id': 4,
+                    'report_number': 'ACC-2024-004',
+                    'date': '2024-05-27',
+                    'time': '11:20',
+                    'location': 'River Road, Bridge',
+                    'vehicles': 1,
+                    'status': 'pending'
+                },
+                {
+                    'id': 5,
+                    'report_number': 'ACC-2024-005',
+                    'date': '2024-05-26',
+                    'time': '09:30',
+                    'location': 'School Street, Near Park',
+                    'vehicles': 2,
+                    'status': 'verified'
+                }
+            ],
+            'time_labels': [
+                '2024-05-22', '2024-05-23', '2024-05-24', 
+                '2024-05-25', '2024-05-26', '2024-05-27', '2024-05-28'
+            ],
+            'time_data': [3, 5, 2, 4, 6, 3, 5]
+        }
+
         return render_template('dashboard.html', **context)
     except Exception as e:
         # Log the full error for debugging
@@ -120,9 +122,7 @@ def dashboard():
         return render_template('error.html', error=str(e)), 500
 
 @bp.route('/logout')
-@login_required
 def logout():
     """Handle user logout"""
-    logout_user()
     flash('You have been logged out successfully.', 'success')
     return redirect(url_for('main.login')) 

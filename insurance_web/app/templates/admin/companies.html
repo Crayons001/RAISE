@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Companies{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-2xl font-semibold text-gray-900">Manage Companies</h1>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200">
+            {% for company in companies %}
+            <li>
+                <div class="px-4 py-4 sm:px-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ company.name }}
+                            </p>
+                            <div class="ml-2 flex-shrink-0 flex">
+                                <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if company.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ 'Active' if company.is_active else 'Inactive' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-sm text-gray-500">
+                                Created {{ company.created_at.strftime('%Y-%m-%d') }}
+                            </div>
+                            <form action="{{ url_for('admin.toggle_company_status', company_id=company.id) }}" method="POST" class="inline">
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md 
+                                    {% if company.is_active %}
+                                    text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                                    {% else %}
+                                    text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500
+                                    {% endif %}">
+                                    {{ 'Deactivate' if company.is_active else 'Activate' }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="mt-2 sm:flex sm:justify-between">
+                        <div class="sm:flex">
+                            <p class="flex items-center text-sm text-gray-500">
+                                <i class="fas fa-envelope mr-1.5 text-gray-400"></i>
+                                {{ company.email }}
+                            </p>
+                            <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                                <i class="fas fa-phone mr-1.5 text-gray-400"></i>
+                                {{ company.phone }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {% else %}
+            <li class="px-4 py-5 text-center text-sm text-gray-500">
+                No companies found
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %} 

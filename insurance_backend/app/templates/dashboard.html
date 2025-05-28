@@ -2,6 +2,10 @@
 
 {% block title %}Dashboard - RAISE Insurance{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-gray-100">
     <div class="py-10">
@@ -14,138 +18,217 @@
         </header>
         <main>
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                {% if current_user.role == 'admin' %}
-                    <!-- Admin Dashboard -->
-                    <div class="px-4 py-5 sm:px-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">System Overview</h3>
-                        <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                            <div class="bg-white overflow-hidden shadow rounded-lg">
-                                <div class="px-4 py-5 sm:p-6">
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                                    <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ total_users }}</dd>
-                                </div>
-                            </div>
-                            <div class="bg-white overflow-hidden shadow rounded-lg">
-                                <div class="px-4 py-5 sm:p-6">
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Accidents</dt>
-                                    <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ total_accidents }}</dd>
-                                </div>
-                            </div>
-                            <div class="bg-white overflow-hidden shadow rounded-lg">
-                                <div class="px-4 py-5 sm:p-6">
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Claims</dt>
-                                    <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ total_claims }}</dd>
+                <!-- Quick Stats Section -->
+                <div class="mt-8">
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                        <!-- Total Reports Card -->
+                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                            <div class="p-5">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                                        <i class="fas fa-file-alt text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt class="text-sm font-medium text-gray-500 truncate">Total Reports</dt>
+                                            <dd class="flex items-baseline">
+                                                <div class="text-2xl font-semibold text-gray-900">{{ total_reports }}</div>
+                                            </dd>
+                                        </dl>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                {% elif current_user.role == 'police' %}
-                    <!-- Police Dashboard -->
-                    <div class="px-4 py-5 sm:px-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Accidents</h3>
-                        <div class="mt-5">
-                            <div class="flex flex-col">
-                                <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                                        <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                                            <table class="min-w-full divide-y divide-gray-200">
-                                                <thead class="bg-gray-50">
-                                                    <tr>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="bg-white divide-y divide-gray-200">
-                                                    {% for accident in recent_accidents %}
-                                                    <tr>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                            {{ accident.date_time.strftime('%Y-%m-%d %H:%M') }}
-                                                        </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                            {{ accident.location }}
-                                                        </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap">
-                                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                {% if accident.status == 'pending' %}bg-yellow-100 text-yellow-800
-                                                                {% elif accident.status == 'approved' %}bg-green-100 text-green-800
-                                                                {% else %}bg-red-100 text-red-800{% endif %}">
-                                                                {{ accident.status }}
-                                                            </span>
-                                                        </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                            <a href="{{ url_for('accidents.view_accident', accident_id=accident.id) }}" 
-                                                               class="text-blue-600 hover:text-blue-900">View</a>
-                                                        </td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                        <!-- Pending Reports Card -->
+                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                            <div class="p-5">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                                        <i class="fas fa-clock text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt class="text-sm font-medium text-gray-500 truncate">Pending Review</dt>
+                                            <dd class="flex items-baseline">
+                                                <div class="text-2xl font-semibold text-gray-900">{{ pending_reports }}</div>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Under Investigation Card -->
+                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                            <div class="p-5">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                                        <i class="fas fa-search text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt class="text-sm font-medium text-gray-500 truncate">Under Investigation</dt>
+                                            <dd class="flex items-baseline">
+                                                <div class="text-2xl font-semibold text-gray-900">{{ investigating_reports }}</div>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Completed Reports Card -->
+                        <div class="bg-white overflow-hidden shadow rounded-lg">
+                            <div class="p-5">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                                        <i class="fas fa-check-circle text-white text-xl"></i>
+                                    </div>
+                                    <div class="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt class="text-sm font-medium text-gray-500 truncate">Completed</dt>
+                                            <dd class="flex items-baseline">
+                                                <div class="text-2xl font-semibold text-gray-900">{{ completed_reports }}</div>
+                                            </dd>
+                                        </dl>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                {% elif current_user.role == 'insurance_officer' %}
-                    <!-- Insurance Officer Dashboard -->
-                    <div class="px-4 py-5 sm:px-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Claims</h3>
-                        <div class="mt-5">
-                            <div class="flex flex-col">
-                                <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                                    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                                        <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-                                            <table class="min-w-full divide-y divide-gray-200">
-                                                <thead class="bg-gray-50">
-                                                    <tr>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Filed</th>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Claim Type</th>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="bg-white divide-y divide-gray-200">
-                                                    {% for claim in recent_claims %}
-                                                    <tr>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                            {{ claim.created_at.strftime('%Y-%m-%d') }}
-                                                        </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                            {{ claim.claim_type }}
-                                                        </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap">
-                                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                {% if claim.status == 'pending' %}bg-yellow-100 text-yellow-800
-                                                                {% elif claim.status == 'approved' %}bg-green-100 text-green-800
-                                                                {% else %}bg-red-100 text-red-800{% endif %}">
-                                                                {{ claim.status }}
-                                                            </span>
-                                                        </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                            ${{ "%.2f"|format(claim.amount) }}
-                                                        </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                            <a href="{{ url_for('insurance.view_claim', claim_id=claim.id) }}" 
-                                                               class="text-blue-600 hover:text-blue-900">View</a>
-                                                        </td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
+                <!-- Recent Reports Section -->
+                <div class="mt-8">
+                    <div class="bg-white shadow rounded-lg">
+                        <div class="px-4 py-5 sm:px-6">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Reports</h3>
+                            <!-- Temporarily removed View All link -->
+                        </div>
+                        <div class="border-t border-gray-200">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report #</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicles</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <!-- Temporarily removed Actions column -->
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for report in recent_reports %}
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                {{ report.report_number }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ report.date }} {{ report.time }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ report.location }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ report.vehicles }} vehicle(s)
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    {% if report.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                                    {% elif report.status == 'complete' %}bg-green-100 text-green-800
+                                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                                    {{ report.status|title }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                {% endif %}
+                </div>
+
+                <!-- Analytics Section -->
+                <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+                    <!-- Reports by Status Chart -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Reports by Status</h3>
+                        <canvas id="statusChart" height="300"></canvas>
+                    </div>
+
+                    <!-- Reports Over Time Chart -->
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Reports Over Time</h3>
+                        <canvas id="timeChart" height="300"></canvas>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Reports by Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Under Investigation', 'Completed'],
+            datasets: [{
+                data: [{{ pending_reports }}, {{ investigating_reports }}, {{ completed_reports }}],
+                backgroundColor: ['#FCD34D', '#A78BFA', '#34D399'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Reports Over Time Chart
+    const timeCtx = document.getElementById('timeChart').getContext('2d');
+    new Chart(timeCtx, {
+        type: 'line',
+        data: {
+            labels: {{ time_labels|tojson }},
+            datasets: [{
+                label: 'Reports',
+                data: {{ time_data|tojson }},
+                borderColor: '#3B82F6',
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %} 

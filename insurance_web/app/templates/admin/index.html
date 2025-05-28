@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Users -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                        <i class="fas fa-users text-white text-xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+                            <dd class="text-lg font-semibold text-gray-900">{{ total_users }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Companies -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                        <i class="fas fa-building text-white text-xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Companies</dt>
+                            <dd class="text-lg font-semibold text-gray-900">{{ total_companies }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Reports -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                        <i class="fas fa-file-alt text-white text-xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Reports</dt>
+                            <dd class="text-lg font-semibold text-gray-900">{{ total_reports }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Reports -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
+                        <i class="fas fa-clock text-white text-xl"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Pending Reports</dt>
+                            <dd class="text-lg font-semibold text-gray-900">{{ pending_reports }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Recent Reports -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Reports</h3>
+            </div>
+            <div class="border-t border-gray-200">
+                <ul class="divide-y divide-gray-200">
+                    {% for report in recent_reports %}
+                    <li class="px-4 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <p class="text-sm font-medium text-blue-600">
+                                    Report #{{ report.incident_no }}
+                                </p>
+                                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if report.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif report.status == 'approved' %}bg-green-100 text-green-800
+                                    {% elif report.status == 'rejected' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ report.status|title }}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                {{ report.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="px-4 py-5 text-center text-sm text-gray-500">
+                        No recent reports
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Recent Users -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Users</h3>
+            </div>
+            <div class="border-t border-gray-200">
+                <ul class="divide-y divide-gray-200">
+                    {% for user in recent_users %}
+                    <li class="px-4 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ user.email }}
+                                </p>
+                                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ 'Active' if user.is_active else 'Inactive' }}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                {{ user.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="px-4 py-5 text-center text-sm text-gray-500">
+                        No recent users
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

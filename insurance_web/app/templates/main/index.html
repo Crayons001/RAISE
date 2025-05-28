@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Total Reports Card -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-file-alt text-primary fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="text-muted mb-1">Total Reports</h6>
+                        <h3 class="mb-0">{{ total_reports }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Reports Card -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-clock text-success fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="text-muted mb-1">Recent Reports</h6>
+                        <h3 class="mb-0">{{ recent_reports }}</h3>
+                        <small class="text-muted">Last 30 days</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Reports Card -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-hourglass-half text-warning fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="text-muted mb-1">Pending Reports</h6>
+                        <h3 class="mb-0">{{ pending_reports }}</h3>
+                        <small class="text-muted">Awaiting review</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flagged Reports Card -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-danger bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-exclamation-triangle text-danger fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="text-muted mb-1">Flagged Reports</h6>
+                        <h3 class="mb-0">{{ fraud_reports }}</h3>
+                        <small class="text-muted">Requires attention</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Monthly Statistics Chart -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Monthly Report Statistics</h5>
+                <div class="dropdown">
+                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('reports.index') }}">View All Reports</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyStatsChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Reports List -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Recent Reports</h5>
+                <a href="{{ url_for('reports.index') }}" class="btn btn-sm btn-primary">
+                    View All
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_reports_list %}
+                <div class="list-group list-group-flush">
+                    {% for report in recent_reports_list %}
+                    <a href="{{ url_for('reports.view', incident_no=report.incident_no) }}" 
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Report #{{ report.incident_no }}</h6>
+                                <p class="mb-1 text-muted small">
+                                    <i class="fas fa-car me-1"></i>{{ report.vehicle_reg_no }}
+                                </p>
+                            </div>
+                            <span class="badge badge-{{ report.status }}">
+                                {{ report.status|title }}
+                            </span>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>{{ report.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </small>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">No reports found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Monthly Statistics Chart
+    const ctx = document.getElementById('monthlyStatsChart').getContext('2d');
+    const monthlyData = {{ monthly_stats|tojson }};
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthlyData.map(item => item.month),
+            datasets: [{
+                label: 'Reports',
+                data: monthlyData.map(item => item.count),
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1e293b',
+                    bodyColor: '#64748b',
+                    borderColor: '#e2e8f0',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
+                    callbacks: {
+                        title: function(context) {
+                            const date = new Date(context[0].label + '-01');
+                            return date.toLocaleDateString('en-US', { 
+                                month: 'long', 
+                                year: 'numeric' 
+                            });
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#64748b'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#e2e8f0'
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

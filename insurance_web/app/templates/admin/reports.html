@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Reports{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-2xl font-semibold text-gray-900">Manage Reports</h1>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200">
+            {% for report in reports %}
+            <li>
+                <a href="{{ url_for('reports.view', report_id=report.id) }}" class="block hover:bg-gray-50">
+                    <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <p class="text-sm font-medium text-blue-600">
+                                    Report #{{ report.incident_no }}
+                                </p>
+                                <div class="ml-2 flex-shrink-0 flex">
+                                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if report.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif report.status == 'approved' %}bg-green-100 text-green-800
+                                        {% elif report.status == 'rejected' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ report.status|title }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                {{ report.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between">
+                            <div class="sm:flex">
+                                <p class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-car mr-1.5 text-gray-400"></i>
+                                    {{ report.vehicle.registration_number }}
+                                </p>
+                                <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                                    <i class="fas fa-building mr-1.5 text-gray-400"></i>
+                                    {{ report.company.name }}
+                                </p>
+                            </div>
+                            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                                {{ report.location }}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            {% else %}
+            <li class="px-4 py-5 text-center text-sm text-gray-500">
+                No reports found
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %} 

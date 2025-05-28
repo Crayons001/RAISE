@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Register Company{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+            <div class="md:col-span-1">
+                <div class="px-4 sm:px-0">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Register New Insurance Company</h3>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Register a new insurance company in the system. All fields marked with * are required.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-5 md:mt-0 md:col-span-2">
+                <form action="{{ url_for('admin.register_company') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="shadow sm:rounded-md sm:overflow-hidden">
+                        <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                            <div class="grid grid-cols-6 gap-6">
+                                <div class="col-span-6 sm:col-span-3">
+                                    <label for="company_reg_no" class="block text-sm font-medium text-gray-700">Company Registration Number *</label>
+                                    <input type="text" name="company_reg_no" id="company_reg_no" required
+                                        class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="e.g., INS123456">
+                                </div>
+
+                                <div class="col-span-6 sm:col-span-3">
+                                    <label for="license_no" class="block text-sm font-medium text-gray-700">License Number *</label>
+                                    <input type="text" name="license_no" id="license_no" required
+                                        class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="e.g., LIC789012">
+                                </div>
+
+                                <div class="col-span-6">
+                                    <label for="company_name" class="block text-sm font-medium text-gray-700">Company Name *</label>
+                                    <input type="text" name="company_name" id="company_name" required
+                                        class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="e.g., ABC Insurance Company Ltd">
+                                </div>
+
+                                <div class="col-span-6">
+                                    <label for="physical_address" class="block text-sm font-medium text-gray-700">Physical Address *</label>
+                                    <input type="text" name="physical_address" id="physical_address" required
+                                        class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="e.g., 123 Insurance Street, Nairobi">
+                                </div>
+
+                                <div class="col-span-6 sm:col-span-3">
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address *</label>
+                                    <input type="email" name="email" id="email" required
+                                        class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="e.g., contact@company.com">
+                                </div>
+
+                                <div class="col-span-6 sm:col-span-3">
+                                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number *</label>
+                                    <input type="tel" name="phone" id="phone" required
+                                        class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="e.g., +254 700 000000">
+                                </div>
+
+                                <div class="col-span-6">
+                                    <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
+                                    <input type="url" name="website" id="website"
+                                        class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="e.g., https://www.company.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="px-4 py-3 {% if category == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-700{% endif %}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        {% endwith %}
+
+                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                            <button type="submit"
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Register Company
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

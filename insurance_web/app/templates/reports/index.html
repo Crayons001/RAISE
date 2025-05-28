@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-semibold text-gray-900">Accident Reports</h1>
+        <a href="{{ url_for('reports.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            New Report
+        </a>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul class="divide-y divide-gray-200">
+            {% for report in reports %}
+            <li>
+                <a href="{{ url_for('reports.view', report_id=report.id) }}" class="block hover:bg-gray-50">
+                    <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <p class="text-sm font-medium text-blue-600 truncate">
+                                    Report #{{ report.incident_no }}
+                                </p>
+                                <div class="ml-2 flex-shrink-0 flex">
+                                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if report.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif report.status == 'approved' %}bg-green-100 text-green-800
+                                        {% elif report.status == 'rejected' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ report.status|title }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="ml-2 flex-shrink-0 flex">
+                                <p class="text-sm text-gray-500">
+                                    {{ report.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between">
+                            <div class="sm:flex">
+                                <p class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-car mr-1.5 text-gray-400"></i>
+                                    {{ report.vehicle.registration_number }}
+                                </p>
+                                <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                                    <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                                    {{ report.location }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+            {% else %}
+            <li class="px-4 py-5 sm:px-6">
+                <p class="text-sm text-gray-500 text-center">No reports found.</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %} 
