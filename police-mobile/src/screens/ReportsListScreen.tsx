@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useReportsStore } from '../store/reportsStore';
+import { useReportStore } from '../stores/reportStore';
 
 type TabParamList = {
   Dashboard: undefined;
@@ -43,11 +43,12 @@ type Report = {
 const ReportsListScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
-  const reports = useReportsStore(state => state.reports);
+  const reports = useReportStore(state => state.reports);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'complete'>('all');
 
-  const filteredReports = reports.filter((report) => {
+  const sortedReports = reports.slice().sort((a, b) => Number(b.id) - Number(a.id));
+  const filteredReports = sortedReports.filter((report) => {
     const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          report.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          report.description.toLowerCase().includes(searchQuery.toLowerCase());

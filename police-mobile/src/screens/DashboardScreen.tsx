@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useReportsStore } from '../store/reportsStore';
+import { useReportStore } from '../stores/reportStore';
 
 type TabParamList = {
   Dashboard: undefined;
@@ -30,7 +30,7 @@ type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 const DashboardScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
-  const reports = useReportsStore(state => state.reports);
+  const reports = useReportStore(state => state.reports);
   const [fabOpacity] = useState(new Animated.Value(1));
   const [isAtBottom, setIsAtBottom] = useState(false);
 
@@ -68,7 +68,7 @@ const DashboardScreen = () => {
     },
   ];
 
-  const recentReports = reports.slice(0, 5);
+  const recentReports = reports.slice().sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 5);
 
   return (
     <View style={styles.container}>

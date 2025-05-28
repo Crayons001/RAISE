@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import MapView, { Marker, PROVIDER_DEFAULT, MapPressEvent } from 'react-native-maps';
 import * as MediaLibrary from 'expo-media-library';
-import { useReportsStore } from '../store/reportsStore';
+import { useReportStore } from '../stores/reportStore';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
@@ -35,7 +35,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 const NewReportScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
-  const addReport = useReportsStore(state => state.addReport);
+  const addReport = useReportStore(state => state.addReport);
   const [formData, setFormData] = useState({
     accidentDate: new Date(),
     location: '',
@@ -283,6 +283,8 @@ const NewReportScreen = () => {
 
   const handleSubmit = () => {
     const newReport = {
+      id: Date.now().toString(),
+      reportNumber: 'RPT-' + Date.now(),
       title: 'Vehicle Collision', // TODO: Add title field to form
       location: formData.location,
       date: formData.accidentDate.toLocaleDateString(),
@@ -303,6 +305,16 @@ const NewReportScreen = () => {
     };
 
     addReport(newReport);
+    // Reset form fields
+    setFormData({
+      accidentDate: new Date(),
+      location: '',
+      description: '',
+      coordinates: null,
+      address: '',
+    });
+    setMediaItems([]);
+    setVehicleDetails([]);
     navigation.goBack();
   };
 
