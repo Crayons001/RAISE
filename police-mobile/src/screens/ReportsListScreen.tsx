@@ -17,7 +17,7 @@ type TabParamList = {
 
 type RootStackParamList = {
   MainTabs: undefined;
-  'Report Details': { reportId: number };
+  'Report Details': { reportId: string };
 };
 
 type NavigationProp = CompositeNavigationProp<
@@ -26,12 +26,13 @@ type NavigationProp = CompositeNavigationProp<
 >;
 
 type Report = {
-  id: number;
-  title: string;
+  id: string;
+  reportNumber: string;
   location: string;
   date: string;
   time: string;
   status: 'pending' | 'complete';
+  description: string;
   vehicles: Array<{
     registrationNumber: string;
     make: string;
@@ -47,9 +48,9 @@ const ReportsListScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'complete'>('all');
 
-  const sortedReports = reports.slice().sort((a, b) => Number(b.id) - Number(a.id));
+  const sortedReports = reports.slice().sort((a, b) => parseInt(b.id) - parseInt(a.id));
   const filteredReports = sortedReports.filter((report) => {
-    const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = report.reportNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          report.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          report.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
@@ -110,18 +111,17 @@ const ReportsListScreen = () => {
                 onPress={() => navigation.navigate('Report Details', { reportId: report.id })}
               >
                 <Card.Content>
-                  <View style={styles.reportHeader}>
-                    <Text variant="titleMedium" style={styles.reportTitle}>{report.title}</Text>
+                  <View style={styles.cardHeader}>
+                    <Text variant="titleMedium" style={styles.reportNumber}>
+                      {report.reportNumber}
+                    </Text>
                     <Chip
                       mode="flat"
                       style={[
                         styles.statusChip,
-                        { 
-                          backgroundColor: report.status === 'complete' ? '#4CAF50' : '#FFA000',
-                          minWidth: 90,
-                        }
+                        { backgroundColor: report.status === 'complete' ? '#4CAF50' : '#FFA000' }
                       ]}
-                      textStyle={styles.statusChipText}
+                      textStyle={{ color: 'white' }}
                     >
                       {report.status === 'complete' ? 'Complete' : 'Pending'}
                     </Chip>
@@ -205,29 +205,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     elevation: 2,
   },
-  reportHeader: {
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
     gap: 8,
   },
-  reportTitle: {
-    flex: 1,
+  reportNumber: {
+    fontWeight: 'bold',
+    color: '#333',
   },
   statusChip: {
     height: 32,
     justifyContent: 'center',
     paddingHorizontal: 12,
     minWidth: 90,
-  },
-  statusChipText: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    includeFontPadding: false,
-    textAlignVertical: 'center',
   },
   reportDetails: {
     flexDirection: 'row',

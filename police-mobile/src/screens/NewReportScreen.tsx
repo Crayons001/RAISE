@@ -283,9 +283,6 @@ const NewReportScreen = () => {
 
   const handleSubmit = () => {
     const newReport = {
-      id: Date.now().toString(),
-      reportNumber: 'RPT-' + Date.now(),
-      title: 'Vehicle Collision', // TODO: Add title field to form
       location: formData.location,
       date: formData.accidentDate.toLocaleDateString(),
       time: formData.accidentDate.toLocaleTimeString(),

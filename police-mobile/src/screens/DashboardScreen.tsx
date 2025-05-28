@@ -17,7 +17,7 @@ type TabParamList = {
 
 type RootStackParamList = {
   MainTabs: undefined;
-  'Report Details': { reportId: number };
+  'Report Details': { reportId: string };
 };
 
 type NavigationProp = CompositeNavigationProp<
@@ -26,6 +26,22 @@ type NavigationProp = CompositeNavigationProp<
 >;
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
+
+type Report = {
+  id: string;
+  reportNumber: string;
+  location: string;
+  date: string;
+  time: string;
+  status: 'pending' | 'complete';
+  description: string;
+  vehicles: Array<{
+    registrationNumber: string;
+    make: string;
+    model: string;
+    damage: string;
+  }>;
+};
 
 const DashboardScreen = () => {
   const theme = useTheme();
@@ -50,25 +66,8 @@ const DashboardScreen = () => {
     }).start();
   };
 
-  const stats = [
-    {
-      title: 'Total Reports',
-      value: reports.length.toString(),
-      icon: 'file-document' as const,
-    },
-    {
-      title: 'Pending',
-      value: reports.filter(r => r.status === 'pending').length.toString(),
-      icon: 'clock-outline' as const,
-    },
-    {
-      title: 'Completed',
-      value: reports.filter(r => r.status === 'complete').length.toString(),
-      icon: 'check-circle' as const,
-    },
-  ];
-
-  const recentReports = reports.slice().sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 5);
+  const sortedReports = reports.slice().sort((a, b) => parseInt(b.id) - parseInt(a.id));
+  const recentReports = sortedReports.slice(0, 5);
 
   return (
     <View style={styles.container}>
@@ -92,101 +91,75 @@ const DashboardScreen = () => {
         scrollEventThrottle={16}
       >
         <View style={styles.statsContainer}>
-          {stats.map((stat, index) => (
-            <Card key={index} style={styles.statCard}>
-              <Card.Content style={styles.statContent}>
-                <MaterialCommunityIcons
-                  name={stat.icon}
-                  size={32}
-                  color={theme.colors.primary}
-                />
-                <Text variant="headlineMedium" style={styles.statValue}>
-                  {stat.value}
-                </Text>
-                <Text variant="bodyMedium" style={styles.statTitle}>
-                  {stat.title}
-                </Text>
+          <Card style={styles.statsCard}>
+            <Card.Content>
+              <Text variant="titleLarge" style={styles.statsNumber}>
+                {reports.filter(r => r.status === 'pending').length}
+              </Text>
+              <Text variant="bodyMedium" style={styles.statsLabel}>Pending Reports</Text>
+            </Card.Content>
+          </Card>
+          <Card style={styles.statsCard}>
+            <Card.Content>
+              <Text variant="titleLarge" style={styles.statsNumber}>
+                {reports.filter(r => r.status === 'complete').length}
+              </Text>
+              <Text variant="bodyMedium" style={styles.statsLabel}>Completed Reports</Text>
+            </Card.Content>
+          </Card>
+        </View>
+
+        <Surface style={styles.section} elevation={1}>
+          <View style={styles.sectionHeader}>
+            <Text variant="titleLarge" style={styles.sectionTitle}>Recent Reports</Text>
+            <Button
+              mode="text"
+              onPress={() => navigation.navigate('Reports')}
+              style={styles.viewAllButton}
+            >
+              View All
+            </Button>
+          </View>
+          {recentReports.map((report) => (
+            <Card
+              key={report.id}
+              style={styles.reportCard}
+              onPress={() => navigation.navigate('Report Details', { reportId: report.id })}
+            >
+              <Card.Content>
+                <View style={styles.cardHeader}>
+                  <Text variant="titleMedium" style={styles.reportNumber}>
+                    {report.reportNumber}
+                  </Text>
+                  <Chip
+                    mode="flat"
+                    style={[
+                      styles.statusChip,
+                      { backgroundColor: report.status === 'complete' ? '#4CAF50' : '#FFA000' }
+                    ]}
+                    textStyle={{ color: 'white' }}
+                  >
+                    {report.status === 'complete' ? 'Complete' : 'Pending'}
+                  </Chip>
+                </View>
+                <View style={styles.cardDetails}>
+                  <View style={styles.infoRow}>
+                    <MaterialCommunityIcons name="map-marker" size={20} color={theme.colors.primary} />
+                    <Text variant="bodyMedium" style={styles.infoText}>{report.location}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
+                    <Text variant="bodyMedium" style={styles.infoText}>{report.date}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <MaterialCommunityIcons name="clock-outline" size={20} color={theme.colors.primary} />
+                    <Text variant="bodyMedium" style={styles.infoText}>{report.time}</Text>
+                  </View>
+                </View>
               </Card.Content>
             </Card>
           ))}
-        </View>
-
-        <View style={styles.section}>
-          <Text variant="titleLarge" style={styles.sectionTitle}>
-            Recent Reports
-          </Text>
-          {recentReports.length > 0 ? (
-            recentReports.map((report) => (
-              <Card 
-                key={report.id}
-                style={styles.reportCard}
-                onPress={() => navigation.navigate('Report Details', { reportId: report.id })}
-              >
-                <Card.Content>
-                  <View style={styles.reportHeader}>
-                    <Text variant="titleMedium" style={styles.reportTitle}>{report.title}</Text>
-                    <Chip
-                      mode="flat"
-                      style={[
-                        styles.statusChip,
-                        { 
-                          backgroundColor: report.status === 'complete' ? '#4CAF50' : '#FFA000',
-                          minWidth: 90,
-                        }
-                      ]}
-                      textStyle={styles.statusChipText}
-                    >
-                      {report.status === 'complete' ? 'Complete' : 'Pending'}
-                    </Chip>
-                  </View>
-                  <View style={styles.reportDetails}>
-                    <MaterialCommunityIcons
-                      name="map-marker"
-                      size={16}
-                      color={theme.colors.primary}
-                    />
-                    <Text variant="bodyMedium" style={styles.reportLocation}>
-                      {report.location}
-                    </Text>
-                    <MaterialCommunityIcons
-                      name="calendar"
-                      size={16}
-                      color={theme.colors.primary}
-                    />
-                    <Text variant="bodyMedium">{report.date}</Text>
-                    <MaterialCommunityIcons
-                      name="clock-outline"
-                      size={16}
-                      color={theme.colors.primary}
-                    />
-                    <Text variant="bodyMedium">{report.time}</Text>
-                  </View>
-                  <View style={styles.vehicleInfo}>
-                    <Text variant="bodySmall" style={styles.vehicleCount}>
-                      {report.vehicles.length} vehicle{report.vehicles.length > 1 ? 's' : ''} involved
-                    </Text>
-                  </View>
-                </Card.Content>
-                <Card.Actions>
-                  <Button 
-                    mode="text" 
-                    onPress={() => navigation.navigate('Report Details', { reportId: report.id })}
-                  >
-                    View Details
-                  </Button>
-                </Card.Actions>
-              </Card>
-            ))
-          ) : (
-            <Card style={styles.emptyCard}>
-              <Card.Content>
-                <Text variant="bodyLarge" style={styles.emptyText}>
-                  No reports yet. Create your first report!
-                </Text>
-              </Card.Content>
-            </Card>
-          )}
-        </View>
+        </Surface>
       </ScrollView>
 
       <Animated.View style={[styles.fabContainer, { opacity: fabOpacity }]}>
@@ -252,41 +225,47 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 8,
   },
-  statCard: {
+  statsCard: {
     flex: 1,
     elevation: 2,
   },
-  statContent: {
-    alignItems: 'center',
-    padding: 8,
-  },
-  statValue: {
+  statsNumber: {
     marginTop: 8,
     fontWeight: 'bold',
   },
-  statTitle: {
+  statsLabel: {
     marginTop: 4,
     textAlign: 'center',
   },
   section: {
     padding: 16,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   sectionTitle: {
     marginBottom: 16,
+  },
+  viewAllButton: {
+    margin: 0,
   },
   reportCard: {
     marginBottom: 12,
     elevation: 2,
   },
-  reportHeader: {
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
     gap: 8,
   },
-  reportTitle: {
-    flex: 1,
+  reportNumber: {
+    fontWeight: 'bold',
+    color: '#333',
   },
   statusChip: {
     height: 32,
@@ -294,29 +273,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     minWidth: 90,
   },
-  statusChipText: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    includeFontPadding: false,
-    textAlignVertical: 'center',
-  },
-  reportDetails: {
+  cardDetails: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
     gap: 8,
     flexWrap: 'wrap',
   },
-  reportLocation: {
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: 16,
   },
-  vehicleInfo: {
-    marginTop: 8,
-  },
-  vehicleCount: {
-    color: '#666',
+  infoText: {
+    marginRight: 8,
   },
   fabContainer: {
     position: 'absolute',
@@ -336,15 +306,6 @@ const styles = StyleSheet.create({
   bottomButtonLabel: {
     color: 'white',
     fontSize: 16,
-  },
-  emptyCard: {
-    marginTop: 8,
-    backgroundColor: '#f8f8f8',
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#666',
-    padding: 16,
   },
 });
 
